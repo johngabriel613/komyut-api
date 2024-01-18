@@ -1,3 +1,4 @@
+
 const config = {
   sqlitePath: './tmp/gtfs',
   agencies: [
@@ -7,6 +8,7 @@ const config = {
   ],
 };
   
+
 
 export default config
 

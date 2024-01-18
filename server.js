@@ -2,7 +2,8 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
-import processGTFS from './config/gtfs.config.js';
+import { importGtfs } from "gtfs";
+import config from './config/gtfs.config.js';
 import { router } from "./router/route.js";
 
 const PORT = process.env.PORT || 5050
@@ -19,7 +20,7 @@ app.use(helmet());
 
 app.use('/api/v1', router);
 
-processGTFS();
+await importGtfs(config);
 app.listen(PORT, () => console.log(`server is running on PORT ${PORT}`));
 
 
