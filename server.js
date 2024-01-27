@@ -9,7 +9,7 @@ import { router } from "./router/route.js";
 const PORT = process.env.PORT || 5050
 const app = express()
 const corsOptions = {
-  origin: 'https://komyut.vercel.app/',
+  origin: 'https://komyut.vercel.app',
   credentials: true
 }
 
@@ -20,7 +20,7 @@ app.use(helmet());
 
 app.use('/api/v1', router);
 
-// await importGtfs(config);
+await importGtfs(config);
 app.listen(PORT, () => console.log(`server is running on PORT ${PORT}`));
 
 
