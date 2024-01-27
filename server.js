@@ -9,7 +9,7 @@ import { router } from "./router/route.js";
 const PORT = process.env.PORT || 5050
 const app = express()
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: 'https://komyut.vercel.app/',
   credentials: true
 }
 
