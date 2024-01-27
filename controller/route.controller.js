@@ -46,16 +46,34 @@ const getRoutesById = async(req, res) => {
       ...data,
       geometry,
     };
+  }
 
+  const getRouteType= (route) => {
+    if(route[0].route_type == 1){
+      return "BUS"
+    }
+    if(route[0].route_type == 2){
+      return "TRAIN"
+    }
+    if (route[0].route_type === 3) {
+      if (/PUJ/.test(route[0].route_id)) {
+        return "JEEP";
+      }
+      return "BUS";
+    }
   }
 
   try {
     const {id} = req.params; 
-    const routes = getStopsAsGeoJSON({route_id: id});
+    const stopsGEO = getStopsAsGeoJSON({route_id: id});
+    const route = getRoutes({route_id: id},['route_id', 'route_short_name', 'route_long_name', 'route_desc' , 'route_type'])
 
-    if(!routes) return res.json("No routes available");
+    if(!route) return res.json("No routes available");
 
-    return res.status(200).json(createLineString(routes));
+    const stops = createLineString(stopsGEO)
+    const routeType = getRouteType(route); // Assuming getRouteType is a function that returns the route type
+
+    return res.status(200).json({ ...stops, ...route[0], route_type: routeType });
   } catch (error) {
     throw error
   }
