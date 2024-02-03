@@ -33,13 +33,13 @@ const getRoutesById = async(req, res) => {
   }
 
   const getRouteType= (route) => {
-    if(route[0].route_type == 1){
+    if(route[0]?.route_type == 1){
       return "BUS"
     }
-    if(route[0].route_type == 2){
+    if(route[0]?.route_type == 2){
       return "TRAIN"
     }
-    if (route[0].route_type === 3) {
+    if (route[0]?.route_type === 3) {
       if (/PUJ/.test(route[0].route_id)) {
         return "JEEP";
       }
