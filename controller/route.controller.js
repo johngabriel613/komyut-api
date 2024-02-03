@@ -17,35 +17,19 @@ const getAllRoutes = async(req, res) => {
 
 const getRoutesById = async(req, res) => {
   
-  const calculateCenter = (coordinates) => {
+  const calculateCenter = (stops) => {
     let totalLat = 0;
     let totalLong = 0;
 
-    for(const coordinate of coordinates){
-      totalLong += coordinate[0]
-      totalLat += coordinate[1]
-    }
+    stops.map(stop => {
+      totalLat += stop.coordinates[1]
+      totalLong += stop.coordinates[0]
+    })
 
-    const avgLong = totalLong / coordinates.length;
-    const avgLat = totalLat / coordinates.length;
+    const avgLong = totalLong / stops.length;
+    const avgLat = totalLat / stops.length;
 
     return [avgLong, avgLat];
-  }
-
-  const createLineString = (data) => {
-    const stops = data.features.map(point => point.geometry.coordinates);
-    const center = calculateCenter(data.features.map(point => point.geometry.coordinates))
-
-    const geometry = {
-      type: 'LineString',
-      coordinates: stops,
-      center: center
-    };
-  
-    return {
-      ...data,
-      geometry,
-    };
   }
 
   const getRouteType= (route) => {
@@ -65,15 +49,30 @@ const getRoutesById = async(req, res) => {
 
   try {
     const {id} = req.params; 
-    const stopsGEO = getStopsAsGeoJSON({route_id: id});
+
+    //get stops info and return only needed data
+    const stops = getStopsAsGeoJSON({route_id: id})
+    const filteredStops = await stops.features.map(stop => {
+      const {stop_id, stop_name} = stop.properties
+      const {coordinates} = stop.geometry
+
+      return {stop_id: stop_id, stop_name: stop_name, coordinates}
+    })
+
+    //get route info and return only needed data
     const route = getRoutes({route_id: id},['route_id', 'route_short_name', 'route_long_name', 'route_desc' , 'route_type'])
+    const routeType = getRouteType(route)
 
-    if(!route) return res.json("No routes available");
-
-    const stops = createLineString(stopsGEO)
-    const routeType = getRouteType(route); // Assuming getRouteType is a function that returns the route type
-
-    return res.status(200).json({ ...stops, ...route[0], route_type: routeType });
+    //calculate all the coordinates of stop to get the center
+    const center = calculateCenter(filteredStops)
+    
+    return res.json({
+                    ...route[0], 
+                    route_type: routeType, 
+                    stops: filteredStops, 
+                    center
+                  })
+    
   } catch (error) {
     throw error
   }
